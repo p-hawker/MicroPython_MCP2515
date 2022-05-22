@@ -30,7 +30,7 @@ def resetCanControler(spiInterface):
 
     spiInterface.write(txData) #send command and return
 
-def readCanReciveReg(AddressSelect, spiInterface):
+def readCanReciveReg(AddressSelect: int, spiInterface):
     #Reads recive buffers from can controller
     Command
     if AddressSelect == 0:
@@ -63,7 +63,7 @@ def writeCanRegister(Address, Data, spiInterface):
 
     spiInterface.write(txData) #Communicate on SPI
 
-def  writeCanTXRegister(AddressSelect, Data, spiInterface):
+def  writeCanTXRegister(AddressSelect:int, Data, spiInterface):
     #Writes to one of the transmit registers
 
     Command
@@ -88,7 +88,7 @@ def  writeCanTXRegister(AddressSelect, Data, spiInterface):
 
     spiInterface.write(txData) #send data and return
 
-def WriteCanReqToSend(RegisterNumber, spiInterface):
+def WriteCanReqToSend(RegisterNumber: int, spiInterface):
     #Writes command to send the data on the can bus
 
     Command
@@ -128,8 +128,26 @@ def ReadCanReciveStatus(spiInterface):
 
     return(rxData[1])  #Return last bit of recived data
 
+def CheckCanMsgSent(StatusByte, Register: int):
+    #Checks if the registers number can msg successfull bit is set
+    #Bits in status Byte:
+    #0:RX0IF #1:RX1IF #2:TXREQ #3:TX0IF
+    #4:TXREQ #5:TX1IF #6:TXREQ #7:TX2IF
+    if (Register > 2 or Register < 0):
+        return 0
+    Test
+    if (Register == 0):
+        Test = 0b00001000
+    elif (Register == 1):
+        Test = 0b00100000
+    elif (Register == 2):
+        Test = 0b10000000
+    
+    return(StatusByte & Test)
 
-
+def CheckIfMsgRecived(StatusByte):
+    #Checks if either recive buffer bits are set
+    return(StatusByte & 0b00000001 or StatusByte & 0b00000010)
 
 
 
