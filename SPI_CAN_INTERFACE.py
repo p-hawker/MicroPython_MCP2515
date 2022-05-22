@@ -1,14 +1,11 @@
 
+from msvcrt import setmode
+from statistics import mode
+import string
 from machine import SPI
 
-spi = SPI(0, baudrate=1000000,
-             polarity=0,
-             phase=0,
-             bits=8,
-             firstbit=SPI.MSB,
-             sck=pin(18),
-             mosi=pin(19),
-             miso=pin(16))
+
+
 
 
 def readCanRegister(Address, spiInterface):
@@ -150,7 +147,51 @@ def CheckIfMsgRecived(StatusByte):
     return(StatusByte & 0b00000001 or StatusByte & 0b00000010)
 
 
+def SetCanMode(spiInterface, Mode:string, RegNumber:int):
+    #Sets the mode of the controller
+    #sets clock pin on at the slowest speed (div by 8)
+
+    SetMode = bytearray[1] #get what mode to set
+    SetMode[0] = 0b00000111 #set default as normal 
+
+    if (Mode == 'normal'):
+        SetMode[0] = 0b00000111
+    elif(Mode == 'sleep'):
+        SetMode[0] = 0b00100111
+    elif(Mode == 'loopback'):
+        SetMode[0] = 0b01000111
+    elif(Mode == 'listen'):
+        SetMode[0] = 0b01100111
+    elif(Mode == 'config'):
+        SetMode[0] = 0b10000111
+
+    Address = bytearray[1] #get what address to set
+    Address[0] = 0x0f #set default as 0th reg
+
+    if(RegNumber == 0):
+        Address = 0x0f
+    elif (RegNumber == 1):
+        Address = 0x1f
+    elif (RegNumber == 2):
+        Address = 0x2f
+
+    writeCanRegister(Address, SetMode, spiInterface) #set register
 
 
 
+spi = SPI(0, baudrate=1000000,
+             polarity=0,
+             phase=0,
+             bits=8,
+             firstbit=SPI.MSB,
+             sck=pin(18),
+             mosi=pin(19),
+             miso=pin(16))
 
+resetCanControler(spi) 
+
+print (readCanRegister(0x0e, spi)) #should read as reset
+
+SetCanMode(spi, 'normal', 0)
+
+print (readCanRegister(0x0e, spi)) #should read as normal
