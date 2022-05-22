@@ -1,12 +1,6 @@
 
-from msvcrt import setmode
-from statistics import mode
 import string
 from machine import SPI
-
-
-
-
 
 def readCanRegister(Address, spiInterface):
     #Reads specified data from the address inputed
